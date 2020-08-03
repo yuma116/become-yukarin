@@ -7,3 +7,5 @@ pyworld
 fastdtw
 matplotlib
 tqdm
+numba==0.48
+world4py

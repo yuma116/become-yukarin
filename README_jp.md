@@ -26,10 +26,13 @@ PYTHONPATH=`pwd` python scripts/extract_acoustic_feature.py ---
 ### 第１段階の学習
 * 音声データを用意する
   * ２つのディレクトリに、入出力の音声データを置く（ファイル名を揃える）
+  * 01input
+  * 02target
 * 音響特徴量を作成する
-  * `scripts/extract_acoustic_feature.py`
+  * `PYTHONPATH=`pwd` python scripts/extract_acoustic_feature.py -i1 ex01/yukarin/input -i2 ex01/yukarin/target -o1 ex01/yukarin/output01 -o2 ex01/yukarin/output02`
 * 学習を回す
-  * `train.py`
+  * `ecport CUDA_PATH=/usr/local/cuda-9.0`
+  * `PYTHONPATH=`pwd` python train.py recipe/config.json 05output`
 * テストする
   * `scripts/voice_conversion_test.py`
 
@@ -53,3 +56,16 @@ PYTHONPATH=`pwd` python scripts/extract_acoustic_feature.py ---
 
 ## License
 [MIT License](./LICENSE)
+
+## Note
+1. wavに変換する（24000Hz）
+1. spleeterで音を分離する
+1. 音響特徴量を作成する
+
+* 長過ぎるとメモリに乗らない
+* とりあえず20秒ごとにカットするコマンドを作成
+
+
+## ToDo
+* 曲の長さを取得する
+* ディレクトリが存在しない時に作成する
