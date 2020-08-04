@@ -10,6 +10,19 @@
     "input_mean_path": "03out1/mean.npy",
     "input_var_path": "03out1/var.npy",
     "num_test": 1,
+    "param": {
+      "acoustic_feature_param": {
+        "alpha": 0.466,
+        "f0_estimating_method": "harvest",
+        "frame_period": 5,
+        "order": 8
+      },
+      "voice_param": {
+        "pad_second": 0.0,
+        "sample_rate": 24000,
+        "top_db": null
+      }
+    },
     "seed": 0,
     "target_glob": "04out2/music*.npy",
     "target_global_noise": 0.01,
@@ -23,12 +36,12 @@
     "mse": 100
   },
   "model": {
-    "in_channels": 10,
-    "out_channels": 10,
-    "generator_base_channels": 64,
-    "generator_extensive_layers": 8,
     "discriminator_base_channels": 32,
     "discriminator_extensive_layers": 5,
+    "generator_base_channels": 64,
+    "generator_extensive_layers": 8,
+    "in_channels": 10,
+    "out_channels": 10,
     "weak_discriminator": false
   },
   "project": {

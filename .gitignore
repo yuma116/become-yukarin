@@ -1,0 +1,13 @@
+# Specify filepatterns you want git to ignore.
+
+yukarin
+*/*/__pycache__/*
+*/__pycache__/*
+*.wav
+*.npy
+*.npz
+pretrained_models
+*.flac
+*log
+*.dot
+*.au*

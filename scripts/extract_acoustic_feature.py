@@ -148,6 +148,7 @@ def generate_mean_var(path_directory: Path):
     aperiodicity_list = []
     mfcc_list = []
     for path in path_directory.glob('*'):
+        print(path)
         feature = acoustic_feature_load_process(path)
         f0_list.append(feature.f0[feature.voiced])  # remove unvoiced
         spectrogram_list.append(feature.spectrogram)
