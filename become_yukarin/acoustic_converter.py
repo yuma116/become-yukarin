@@ -140,6 +140,8 @@ class AcousticConverter(object):
             fs=out_sampling_rate,
             frame_period=self._param.acoustic_feature_param.frame_period,
         )
+        print("out_sampling_rate")
+        print(out_sampling_rate)
         return Wave(out, sampling_rate=out_sampling_rate)
 
     def __call__(self, voice_path: Path, out_sampling_rate: Optional[int] = None):

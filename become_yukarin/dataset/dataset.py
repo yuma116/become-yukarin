@@ -15,6 +15,8 @@ import numpy
 import pysptk
 import pyworld
 import scipy.ndimage
+import matplotlib.pyplot as plt 
+import time
 
 from ..config.config import DatasetConfig
 from ..config.sr_config import SRDatasetConfig
@@ -22,6 +24,7 @@ from ..data_struct import AcousticFeature
 from ..data_struct import LowHighSpectrogramFeature
 from ..data_struct import Wave
 
+i=0
 
 class BaseDataProcess(metaclass=ABCMeta):
     @abstractmethod
@@ -131,7 +134,42 @@ class AcousticFeatureProcess(BaseDataProcess):
         spectrogram = pyworld.cheaptrick(x, f0, t, fs)
         aperiodicity = pyworld.d4c(x, f0, t, fs)
 
+        ts = time.time()
+
+        #メルケプストラムに変換前のスペクトル包絡を可視化
+        plt.figure()
+        plt.imshow(numpy.log10(spectrogram).T, origin='lower')#対数を取ることで見やすくなる
+        plt.colorbar()
+        plt.title('spectrogram1')
+        plt.savefig(str(ts)+"spec1.png")
+
         mfcc = pysptk.sp2mc(spectrogram, order=self._order, alpha=self._alpha)
+        
+        ### visualization ###
+        plt.figure()
+        #スペクトル包絡に合わせてアスペクト比の調節
+        plt.imshow(mfcc.T, aspect=mfcc.shape[0]/mfcc.shape[1]/3.7, origin='lower')
+        plt.colorbar()
+        plt.title('MFCC')
+        plt.savefig(str(ts)+"mfcc.png")
+        #メルケプストラムからスペクトル包絡に変換及び可視化
+        sp_from_mcep = pysptk.mc2sp(mfcc, alpha = 0.46, fftlen = 1024)
+        plt.figure()
+        plt.imshow(numpy.log10(sp_from_mcep).T, origin='lower')
+        plt.colorbar()
+        plt.title('spectrogram2')
+        plt.savefig(str(ts)+"spec2.png")
+        out = pyworld.synthesize(
+            f0=f0,
+            spectrogram=sp_from_mcep,
+            aperiodicity=aperiodicity,
+            fs=fs,
+            frame_period=self._frame_period,
+        )
+        wave = Wave(out, sampling_rate=24000)
+        librosa.output.write_wav(str(ts)+"2nd.wav", wave.wave, wave.sampling_rate, norm=True)
+
+
         voiced = ~(f0 == 0)  # type: numpy.ndarray
 
         feature = AcousticFeature(
