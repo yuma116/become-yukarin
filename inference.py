@@ -1,7 +1,8 @@
 from glob import glob
 from pathlib import Path
 import argparse
-# from progress.bar import Bar
+from progress.bar import Bar
+from functools import partial
 
 import numpy
 
@@ -18,6 +19,7 @@ import matplotlib.pyplot as plt
 import librosa
 # from IPython.display import Audio
 
+
 def command():
 	parser = argparse.ArgumentParser(description="help")
 	parser.add_argument('--iteration_min',default=5000, help="min iteration of the model")
@@ -26,7 +28,8 @@ def command():
 	args = parser.parse_args()
 	return args
 
-def inference(model_itr):
+def inference(model_itr, bar):
+	bar.next()		
 	model_path = Path('05output/predictor_'+str(model_itr)+'.npz')
 	config_path = Path('recipe/config.json')
 	config = create_config(config_path)
@@ -36,10 +39,10 @@ def inference(model_itr):
 
 
 def main(args):
-	# bar = Bar("", max=(int(args.iteration_max)/5000) - int(args.iteration_min)/5000+1)
+	bar = Bar("", max=(int(args.iteration_max)/5000) - int(args.iteration_min)/5000+1)
 	# for itr in range(int(args.iteration_min), int(args.iteration_max)+1, 5000):
-		# bar.next()
-	list(map(inference, range(int(args.iteration_min), int(args.iteration_max)+1, 5000)))
+	inference_partial = partial(inference, bar=bar)
+	list(map(inference_partial, range(int(args.iteration_min), int(args.iteration_max)+1, 5000)))
 
 
 
