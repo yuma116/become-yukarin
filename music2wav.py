@@ -2,11 +2,13 @@ import argparse
 import pathlib
 import os
 import soundfile
+from progress.bar import Bar
+
 
 
 def command():
 	parser = argparse.ArgumentParser(description="help")
-	parser.add_argument('mode', choices=["wave", "spleeter", "conv_name", "short"], help="select a mode")
+	parser.add_argument('mode', choices=["wave", "spleeter", "rename", "short"], help="select a mode")
 	parser.add_argument('--input', help="input music directory")
 	parser.add_argument('--output', help="output directory")
 	
@@ -19,14 +21,14 @@ def main(args):
 		wave(args)
 	elif args.mode == "spleeter":
 		spleeter(args)
-	elif args.mode == "conv_name":
-		conv_name(args)
+	elif args.mode == "rename":
+		rename(args)
 	elif args.mode == "short":
 		short(args)
 
 def wave(args):
 	"""
-	convert files to wave
+	convert files to wave and rename
 
 	:param      args:  The arguments
 	:type       args:  { type_description }
@@ -36,8 +38,12 @@ def wave(args):
 	for file in files.iterdir():
 		parent = str(file.parent)
 		filename = pathlib.PurePosixPath(file).stem
-		output_name = "music"+str(i).zfill(4)
-		os.system("ffmpeg -i "+str(pathlib.PurePath(parent,file.name))+" -ar 24000 "+str(pathlib.PurePath(parent,output_name))+".wav")
+		if args.output is None:
+			output_file = pathlib.Path(parent+"/output", "/music"+str(i).zfill(4)+".wav")
+		else:
+			output_file = pathlib.Path(args.output+"/music"+str(i).zfill(4)+".wav")
+		output_file.parent.mkdir(parents=True, exist_ok=True)
+		os.system("ffmpeg -i "+str(pathlib.PurePath(parent,file.name))+" -ar 24000 "+str(output_file))
 		i+=1
 
 def spleeter(args):
@@ -47,37 +53,38 @@ def spleeter(args):
 	:param      args:  The arguments
 	:type       args:  { type_description }
 	"""
+
+	bar = Bar("", max=len(os.listdir(args.input)))
 	files = pathlib.Path(args.input)
 	i = 1
 	for file in files.iterdir():
 		parent = str(file.parent)
 		filename = pathlib.PurePosixPath(file).stem
 		if args.output is not None:
-			output_name = str(args.output)
-		else:
-			output_name = "music"+str(i).zfill(4)
-	
-		print("spleeter separate -i "+str(pathlib.PurePath(parent,file.name))+" -o "+output_name+" -p spleeter:5stems")
-		os.system("spleeter separate -i "+str(pathlib.PurePath(parent,file.name))+" -o "+output_name+" -p spleeter:5stems")
+			output_dir = pathlib.Path(args.output)
+		
+		output_dir.mkdir(parents=True, exist_ok=True)
+		os.system("spleeter separate -i "+str(pathlib.PurePath(parent,file.name))+" -o "+str(output_dir)+" -p spleeter:5stems")
 		i+=1
+		bar.next()
 
-def conv_name(args):
+def rename(args):
 	"""
 	rename extracted vocal file
 
 	:param      args:  The arguments
 	:type       args:  { type_description }
 	"""
-	files = pathlib.Path(args.input)
-	i = 1
-	for file in files.iterdir():
-		parent = str(pathlib.PurePath(file.parent, "music"+str(i).zfill(4)))
-		filename = pathlib.PurePosixPath(file).stem
-		output_name = str(pathlib.PurePath(args.output, "music"+str(i).zfill(4)+".wav"))
-		# print("cp "+str(pathlib.PurePath(parent,"vocals.wav"))+" "+str(output_name))
-		os.system("cp "+str(pathlib.PurePath(parent,"vocals.wav"))+" "+str(output_name))
-		# os.system("cp "+str(pathlib.PurePath(parent,file.name))+" "+str(output_name))
-		i+=1
+	dirs = pathlib.Path(args.input)
+	# i = 1
+	output_dir = pathlib.Path(args.output)
+	output_dir.mkdir(parents=True, exist_ok=True)
+
+	for dr in dirs.iterdir():
+		filename = dr.name
+		filename_in = pathlib.Path(str(dr)+"/piano.wav")
+		filename_out = pathlib.PurePath(args.output, filename+".wav")
+		os.system("cp "+str(filename_in)+" "+str(filename_out))
 
 def short(args):
 	"""
@@ -93,9 +100,11 @@ def short(args):
 		input_file = str(file)
 		music = soundfile.SoundFile(input_file)
 		length = int(len(music) / music.samplerate)
+		output_dir = pathlib.Path(args.output)
+		output_dir.mkdir(parents=True, exist_ok=True)
 		# separate music into 20 sec
 		for start in range(0, length, 20):
-			output_file = str(pathlib.PurePath(args.output, file.stem+"_"+str(start)+".wav"))
+			output_file = str(pathlib.PurePath(output_dir, file.stem+"_"+str(start)+".wav"))
 			os.system("ffmpeg -i "+input_file+" -ss "+str(start)+" -to "+str(start+20 if start+20 < length else length)+" -c copy "+output_file)
 		i+=1
 

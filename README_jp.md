@@ -29,9 +29,9 @@ PYTHONPATH=`pwd` python scripts/extract_acoustic_feature.py ---
   * 01input
   * 02target
 * 音響特徴量を作成する
-  * `PYTHONPATH=`pwd` python scripts/extract_acoustic_feature.py -i1 ex01/yukarin/input -i2 ex01/yukarin/target -o1 ex01/yukarin/output01 -o2 ex01/yukarin/output02`
+  * `PYTHONPATH=`pwd` python scripts/extract_acoustic_feature.py -i1 01input3 -i2 02target3 -o1 03output1 -o2 04output1`
 * 学習を回す
-  * `ecport CUDA_PATH=/usr/local/cuda-9.0`
+  * `export CUDA_PATH=/usr/local/cuda-9.0`
   * `PYTHONPATH=`pwd` python train.py recipe/config.json 05output`
 * テストする
   * `scripts/voice_conversion_test.py`

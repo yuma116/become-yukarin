@@ -11,3 +11,5 @@ pretrained_models
 *log
 *.dot
 *.au*
+*.mp3
+*.png
