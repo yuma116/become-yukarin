@@ -1,5 +1,7 @@
 from glob import glob
 from pathlib import Path
+import argparse
+# from progress.bar import Bar
 
 import numpy
 
@@ -16,14 +18,32 @@ import matplotlib.pyplot as plt
 import librosa
 # from IPython.display import Audio
 
-model_path = Path('05output/predictor_35000.npz')
-config_path = Path('recipe/config.json')
-config = create_config(config_path)
-acoustic_converter = AcousticConverter(config, model_path)
-# acoustic_converter = AcousticConverter(config, model_path, gpu=0)
+def command():
+	parser = argparse.ArgumentParser(description="help")
+	parser.add_argument('--iteration_min',default=5000, help="min iteration of the model")
+	parser.add_argument('--iteration_max',default=5000, help="max iteration of the model")
+	
+	args = parser.parse_args()
+	return args
 
-# rate = sr_config.dataset.param.voice_param.sample_rate
-wave = acoustic_converter(voice_path="01input02/music0001_80.wav")
-# Audio(data=wave.wave, rate=rate)
-librosa.output.write_wav('inference_output0001.wav', wave.wave, wave.sampling_rate, norm=True)
-# print(type(wave))
+def inference(model_itr):
+	model_path = Path('05output/predictor_'+str(model_itr)+'.npz')
+	config_path = Path('recipe/config.json')
+	config = create_config(config_path)
+	acoustic_converter = AcousticConverter(config, model_path, gpu=0)
+	wave = acoustic_converter(voice_path="01input02/music0001_80.wav")
+	librosa.output.write_wav('inference_output_'+str(model_itr)+'.wav', wave.wave, wave.sampling_rate, norm=True)
+
+
+def main(args):
+	# bar = Bar("", max=(int(args.iteration_max)/5000) - int(args.iteration_min)/5000+1)
+	# for itr in range(int(args.iteration_min), int(args.iteration_max)+1, 5000):
+		# bar.next()
+	list(map(inference, range(int(args.iteration_min), int(args.iteration_max)+1, 5000)))
+
+
+
+
+
+if __name__ == '__main__':
+	main(command())

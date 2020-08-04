@@ -10,3 +10,4 @@ pretrained_models
 *.flac
 *log
 *.dot
+*.au*

@@ -77,6 +77,10 @@ if __name__ == '__main__':
     ext = extensions.snapshot_object(predictor, filename='predictor_{.updater.iteration}.npz')
     trainer.extend(ext, trigger=trigger_snapshot)
 
-    trainer.extend(extensions.LogReport(trigger=trigger_log))
+    # trainer.extend(extensions.LogReport(trigger=trigger_log))
+    trainer.extend(extensions.PlotReport(['discriminator/accuracy', 'discriminator/loss'], 'epoch', file_name='plt01.png'))
+    trainer.extend(extensions.PlotReport(['predictor/mse'], file_name="plt02.png"))
+    trainer.extend(extensions.PlotReport(['predictor/loss'], file_name="plt03.png"))
+    trainer.extend(extensions.ProgressBar((50000, 'iteration')))
 
     trainer.run()
